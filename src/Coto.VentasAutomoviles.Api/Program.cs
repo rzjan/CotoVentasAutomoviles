@@ -1,39 +1,72 @@
-using Microsoft.EntityFrameworkCore;
-using TestVentasAutomoviles.Infrastructure.Data;
+using Coto.VentasAutomoviles.Api.Configurations;
+using Coto.VentasAutomoviles.Api.Extensions;
+using Coto.VentasAutomoviles.Api.Middlewares;
+using Coto.VentasAutomoviles.Api.Service;
+using Coto.VentasAutomoviles.Application.Extensions;
+using Coto.VentasAutomoviles.Infrastructure.Extensions;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Configurar Kestrel para escuchar en todos los puertos necesarios
-builder.WebHost.ConfigureKestrel(serverOptions =>
+var secretKey = "EstaEsUnaClaveMuySeguraYSecreta123456"; //TODO: Solo por prueba tecnica, si no va en vairables de entornos, secrets
+
+// Se deshabilita HTTPS en el entorno de desarrollo
+if (builder.Environment.IsDevelopment())
 {
-    serverOptions.ListenAnyIP(5000); // HTTP    
+    builder.WebHost.ConfigureKestrel(options =>
+    {
+        options.ListenAnyIP(5003); // Puerto HTTP
+    });
+}
+
+// Agregar capas de la aplicación
+builder.Services.AddApplicationServices();
+builder.Services.AddInfrastructureServices(builder.Configuration);
+builder.Services.AddApiServices();
+
+// Configurar autenticación JWT
+var key = Encoding.UTF8.GetBytes(secretKey);
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = "CotoVentasAutomoviles.Api", //Configuro el emisor
+        ValidAudience = "CotoVentasAutomoviles.Apps",       //Configuro destinatarios
+        IssuerSigningKey = new SymmetricSecurityKey(key)
+    };
 });
 
-// Agregar servicio de SQL Server con EF Core
-builder.Services.AddDbContext<VentasAutomovilesDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DesaConnection")));
+// Agregar JwtService como un servicio en el contenedor de dependencias
+builder.Services.AddSingleton<JwtService>();
 
-
-// Add services to the container.
-
+// Agregar servicios adicionales
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddAuthorization();
+builder.Services.AddSwaggerConfiguration();
+builder.Services.AddSingleton<JwtService>();
+
+// Configure logging
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
-
-app.UseHttpsRedirection();
-
+app.UseRouting();
+app.UseAuthentication();
 app.UseAuthorization();
-
 app.MapControllers();
+app.UseMiddleware<ExceptionMiddleware>();
+app.UseSwaggerConfiguration();
 
 app.Run();

@@ -22,6 +22,7 @@
     <ProjectReference Include="..\..\src\Coto.VentasAutomoviles.Application\Coto.VentasAutomoviles.Application.csproj" />
     <ProjectReference Include="..\..\src\Coto.VentasAutomoviles.Domain\Coto.VentasAutomoviles.Domain.csproj" />
     <ProjectReference Include="..\..\src\Coto.VentasAutomoviles.Infrastructure\Coto.VentasAutomoviles.Infrastructure.csproj" />
+    <ProjectReference Include="..\Coto.VentasAutomoviles.Api\Coto.VentasAutomoviles.Api.csproj" />
   </ItemGroup>
 
   <ItemGroup>
