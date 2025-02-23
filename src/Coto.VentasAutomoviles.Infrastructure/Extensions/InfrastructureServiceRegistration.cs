@@ -17,9 +17,7 @@ public static class InfrastructureServiceRegistration
     {
         services.AddDbContext<VentasAutomovilesDbContext>(options =>
             options.UseSqlServer(configuration.GetConnectionString("DesaConnection")));
-
-        //services.AddDbContext<VentasAutomovilesDbContext>(options =>
-        //    options.UseSqlServer(configuration.GetConnectionString("DesaLocalConnection")));
+        
 
         services.AddScoped<IVentaRepository, VentaRepository>();
         //Services

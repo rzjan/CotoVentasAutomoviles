@@ -33,7 +33,8 @@ git clone https://github.com/rzjan/CotoVentasAutomoviles.git
 
 #### 2.2. Alternativa sin Docker: Ejecutar las Migraciones en Base de Datos Local
 1. Abrir el archivo `appsettings.json` y asegurarse de que la cadena de conexión **DesaLocalConnection** esté configurada correctamente.
-2. Desde la **Consola del Administrador de Paquetes** en Visual Studio:
+2. Localiza el Arhivo InfrastructureServiceRegistration donde se encuentra registrado el DbContext y verifica que este Configurado en GetConnectionString la cadena DesaLocalConnection
+3. Desde la **Consola del Administrador de Paquetes** en Visual Studio:
     - Seleccionar el proyecto `Coto.VentasAutomoviles.Infrastructure` como proyecto predeterminado.
     - Asegurar que en la lista de ejecución se seleccione `Coto.VentasAutomoviles.Api`.
     - Ejecutar los siguientes comandos:
