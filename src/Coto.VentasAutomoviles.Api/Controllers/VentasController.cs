@@ -39,10 +39,11 @@ namespace Api.Controllers
         public async Task<IActionResult> GenerarVenta([FromBody] GenerarVentaRequest request)
         {
             //validar request cantidad tiene que ser > 0
+            // Validar request
             if (request.Cantidad <= 0)
             {
                 return BadRequest("La cantidad de vehículos debe ser mayor a 0.");
-            }
+            }                     
 
             var stopwatch = Stopwatch.StartNew();
             try
@@ -55,6 +56,12 @@ namespace Api.Controllers
                     request.ClienteId
                 );
                 var result = await _mediator.Send(command);
+
+                if (!result)
+                {
+                    return BadRequest("No se pudo generar la venta.");
+                }
+
                 return Ok("Venta registrada exitosamente.");
             }
             catch (Exception ex)
